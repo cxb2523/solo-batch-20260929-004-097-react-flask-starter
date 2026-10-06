@@ -26,10 +26,12 @@ class Settings:
     CELERY_RESULT_BACKEND = REDIS_URL
     CELERY_CONFIG = {
         'beat_schedule': {
-            'ping_once': {
-                'task': 'src.tasks.ping_once',
-                'args': (1,),
-                'schedule': 5.0,
+            'requeue-stale-counter-events': {
+                'task': 'src.tasks.requeue_stale_counter_events',
+                'schedule': 30.0,
             },
-        }
+        },
+        # When true (e.g. tests) tasks run synchronously in the caller.
+        'task_always_eager': Parse.bool('CELERY_ALWAYS_EAGER'),
+        'task_eager_propagates': Parse.bool('CELERY_ALWAYS_EAGER'),
     }

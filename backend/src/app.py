@@ -37,7 +37,9 @@ class Application:
         self.db.init_app(self.flask_app)
 
         # Init Flask-Migrate
-        u.wait_for_service('postgres', 5432, timeout=30.0)
+        db_url = self.flask_app.config.get('SQLALCHEMY_DATABASE_URI') or ''
+        if db_url.startswith('postgres'):
+            u.wait_for_service('postgres', 5432, timeout=30.0)
         self.migrate = Migrate(self.flask_app, self.db)
 
     def init_routes(self):

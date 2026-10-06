@@ -1,7 +1,7 @@
 import uuid
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm.session import make_transient
+from sqlalchemy.orm import make_transient
 from sqlalchemy_utils import EncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
@@ -25,16 +25,20 @@ class BaseModel(db.Model):
 
     @classmethod
     def get(cls, *args, exception=False, **kwargs):
-        result = cls.query.filter_by(*args, **kwargs).first()
+        query = cls.query
+        if args:
+            query = query.filter(*args)
+        result = query.filter_by(**kwargs).first()
         if not result and exception:
             raise Exception('No object matches this query!')
         return result
 
     @classmethod
     def list(cls, *args, **kwargs):
-        return cls.query.filter_by(*args, **kwargs) \
-                        .order_by('id') \
-                        .all()
+        query = cls.query
+        if args:
+            query = query.filter(*args)
+        return query.filter_by(**kwargs).order_by(cls.id).all()
 
     @classmethod
     def create(cls, *args, **kwargs):

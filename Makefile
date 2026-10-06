@@ -1,5 +1,7 @@
 VOLUME=$(shell basename $(PWD))
 
+dev: develop
+
 develop: clean build migrations.upgrade run
 
 clean:
