@@ -24,12 +24,17 @@ class Settings:
     # Celery
     CELERY_BROKER_URL = REDIS_URL
     CELERY_RESULT_BACKEND = REDIS_URL
+    _CELERY_EAGER = Parse.bool('CELERY_TASK_ALWAYS_EAGER')
     CELERY_CONFIG = {
+        'task_always_eager': _CELERY_EAGER,
+        'task_eager_propagates': False,
         'beat_schedule': {
-            'ping_once': {
-                'task': 'src.tasks.ping_once',
-                'args': (1,),
-                'schedule': 5.0,
+            # Safety net, not a writer: the worker must never increment the
+            # counter on its own (that double-wrote with the GET endpoint).
+            # This only redelivers lost/stuck events.
+            'reap_stale_events': {
+                'task': 'src.tasks.reap_stale_events',
+                'schedule': 15.0,
             },
         }
     }
